@@ -1,15 +1,15 @@
-def call(String stackName) {
-  if (stackBeingProcessedStatus == 'CREATE_IN_PROGRESS') {
+def call(String awsRegion, String stackName, String stackStatus) {
+  if (stackStatus == 'CREATE_IN_PROGRESS') {
     sh "aws --region ${awsRegion} cloudformation wait stack-create-complete --stack-name ${stackName}"
-  } else (stackBeingProcessedStatus == 'UPDATE_IN_PROGRESS') {
+  } else (stackStatus == 'UPDATE_IN_PROGRESS') {
     sh "aws --region ${awsRegion} cloudformation wait stack-update-complete --stack-name ${stackName}"
-  } else (stackBeingProcessedStatus == 'ROLLBACK_IN_PROGRESS') {
+  } else (stackStatus == 'ROLLBACK_IN_PROGRESS' || stackStatus == 'UPDATE_ROLLBACK_IN_PROGRESS' || stackStatus == 'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS') {
     pollRollbackStack(stackName)
   } else {
-    error('Unrecognised status of Cloudformation stack ' + stackBeingProcessedStatus ' for stack ' + stackName)
+    error('Unrecognised status of Cloudformation stack ' + stackStatus ' for stack ' + stackName)
   }
 }
 
-def pollRollbackStack(String stackName) {
-  sh "while true; do $(aws --region ${awsRegion} cloudformation list-stacks --stack-status-filter ROLLBACK_COMPLETE UPDATE_ROLLBACK_COMPLETE --query 'StackSummaries[?StackName==`\"${stackName}\"`].StackStatus' --output text); if [[ $__STACK_STATUS == *'COMPLETE' ]]; then break; fi; sleep 2; done;"
+def pollRollbackStack(String awsRegion, String stackName) {
+  sh "while true; do $(aws --region ${awsRegion} cloudformation list-stacks --stack-status-filter ROLLBACK_COMPLETE UPDATE_ROLLBACK_COMPLETE --query 'StackSummaries[?StackName==`\"${stackName}\"`].StackStatus' --output text); if [[ \$__STACK_STATUS == *'COMPLETE' ]]; then break; fi; sleep 2; done;"
 }
