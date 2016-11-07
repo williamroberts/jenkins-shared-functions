@@ -8,7 +8,7 @@ def call(String awsRegion, String stackName, String stackStatus) {
   } else if (stackStatus == 'ROLLBACK_IN_PROGRESS' || stackStatus == 'UPDATE_ROLLBACK_IN_PROGRESS' || stackStatus == 'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS') {
     pollRollbackStack(awsRegion, stackName)
   } else {
-    error('Unrecognised status of Cloudformation stack ' + stackStatus ' for stack ' + stackName)
+    error('Unrecognised status of Cloudformation stack ' + stackStatus + ' for stack ' + stackName)
   }
 }
 
