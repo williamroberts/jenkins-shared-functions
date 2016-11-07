@@ -1,5 +1,5 @@
 def call(String awsRegion, String bucketName) {
-  if (checkExistenceOfS3Bucket(bucketName)) {
+  if (checkExistenceOfS3Bucket(awsRegion, bucketName)) {
     println bucketName + " S3 bucket already exists. Proceeding..."
   } else {
     println bucketName + " S3 bucket not found. Creating..."
