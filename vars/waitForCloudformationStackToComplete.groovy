@@ -13,5 +13,15 @@ def call(String awsRegion, String stackName, String stackStatus) {
 }
 
 def pollRollbackStack(String awsRegion, String stackName) {
-  sh "while true; do __STACK_STATUS=$(aws --region ${awsRegion} cloudformation list-stacks --stack-status-filter ROLLBACK_COMPLETE UPDATE_ROLLBACK_COMPLETE --query 'StackSummaries[?StackName==`\"${stackName}\"`].StackStatus' --output text); if [[ \$__STACK_STATUS == *'COMPLETE' ]]; then break; fi; sleep 2; done;"
+  def stackStatus = sh (
+    script: "aws --region ${awsRegion} cloudformation list-stacks --stack-status-filter ROLLBACK_COMPLETE UPDATE_ROLLBACK_COMPLETE --query 'StackSummaries[?StackName==`\"${stackName}\"`].StackStatus' --output text",
+    returnStdout: true
+    ).trim()
+
+  if (stackStatus.endsWith('COMPLETE')) {
+    return;
+  } else {
+    sleep(2000)
+    pollRollbackStack(awsRegion, stackName)
+  }
 }
